@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Ballast.Api/Ballast.Api.csproj" />
+  <Project Path="Ballast.Domain/Ballast.Application.csproj" />
+  <Project Path="Ballast.Infrastructure/Ballast.Infrastructure.csproj" />
+  <Project Path="Ballast.Tests/Ballast.Tests.csproj" />
+</Solution>
