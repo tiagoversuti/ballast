@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import TodosPage from './pages/TodosPage'
 
 export default function App() {
   return (
@@ -12,7 +13,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/todos" element={<div className="p-8 text-gray-500">Todos — coming soon</div>} />
+            <Route path="/todos" element={<TodosPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
