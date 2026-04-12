@@ -35,6 +35,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+await DatabaseSeeder.SeedAsync(connectionString);
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

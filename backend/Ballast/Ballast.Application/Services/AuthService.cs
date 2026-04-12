@@ -1,10 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Ballast.Application.DTOs;
 using Ballast.Application.Entities;
 using Ballast.Application.Interfaces;
+using Ballast.Application.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,7 +21,7 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
         {
             Id = Guid.NewGuid(),
             Username = dto.Username,
-            PasswordHash = HashPassword(dto.Password),
+            PasswordHash = PasswordHasher.Hash(dto.Password),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -32,7 +32,7 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
     public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
     {
         var user = await userRepository.GetByUsernameAsync(dto.Username);
-        if (user is null || !VerifyPassword(dto.Password, user.PasswordHash))
+        if (user is null || !PasswordHasher.Verify(dto.Password, user.PasswordHash))
             return null;
 
         return new AuthResponseDto(GenerateToken(user));
@@ -53,25 +53,5 @@ public class AuthService(IUserRepository userRepository, IConfiguration configur
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    private static string HashPassword(string password)
-    {
-        var salt = RandomNumberGenerator.GetBytes(16);
-        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100_000, HashAlgorithmName.SHA256, 32);
-        return $"{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
-    }
-
-    private static bool VerifyPassword(string password, string storedHash)
-    {
-        var parts = storedHash.Split('.');
-        if (parts.Length != 2)
-            return false;
-
-        var salt = Convert.FromBase64String(parts[0]);
-        var expectedHash = Convert.FromBase64String(parts[1]);
-        var actualHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100_000, HashAlgorithmName.SHA256, 32);
-
-        return CryptographicOperations.FixedTimeEquals(expectedHash, actualHash);
     }
 }
