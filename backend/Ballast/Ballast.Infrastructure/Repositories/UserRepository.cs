@@ -1,58 +1,46 @@
+using System.Data;
 using Ballast.Application.Entities;
 using Ballast.Application.Interfaces;
-using Microsoft.Data.SqlClient;
 
 namespace Ballast.Infrastructure.Repositories;
 
-public class UserRepository(string connectionString) : IUserRepository
+public class UserRepository(IDatabase db) : IUserRepository
 {
     public async Task<User?> GetByUsernameAsync(string username)
     {
-        const string sql = "SELECT Id, Username, PasswordHash, CreatedAt FROM Users WHERE Username = @Username";
+        var results = await db.QueryAsync(
+            "SELECT Id, Username, PasswordHash, CreatedAt FROM Users WHERE Username = @Username",
+            new Dictionary<string, object> { ["@Username"] = username },
+            MapRow);
 
-        await using var connection = new SqlConnection(connectionString);
-        await using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@Username", username);
-        await connection.OpenAsync();
-        await using var reader = await command.ExecuteReaderAsync();
-
-        return await reader.ReadAsync() ? MapRow(reader) : null;
+        return results.Count > 0 ? results[0] : null;
     }
 
     public async Task<bool> UsernameExistsAsync(string username)
     {
-        const string sql = "SELECT COUNT(1) FROM Users WHERE Username = @Username";
+        var count = await db.ScalarIntAsync(
+            "SELECT COUNT(1) FROM Users WHERE Username = @Username",
+            new Dictionary<string, object> { ["@Username"] = username });
 
-        await using var connection = new SqlConnection(connectionString);
-        await using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@Username", username);
-        await connection.OpenAsync();
-        var count = Convert.ToInt32(await command.ExecuteScalarAsync());
         return count > 0;
     }
 
-    public async Task AddAsync(User user)
-    {
-        const string sql = """
-            INSERT INTO Users (Id, Username, PasswordHash, CreatedAt)
-            VALUES (@Id, @Username, @PasswordHash, @CreatedAt)
-            """;
+    public Task AddAsync(User user) =>
+        db.ExecuteAsync(
+            "INSERT INTO Users (Id, Username, PasswordHash, CreatedAt) VALUES (@Id, @Username, @PasswordHash, @CreatedAt)",
+            new Dictionary<string, object>
+            {
+                ["@Id"] = user.Id,
+                ["@Username"] = user.Username,
+                ["@PasswordHash"] = user.PasswordHash,
+                ["@CreatedAt"] = user.CreatedAt
+            });
 
-        await using var connection = new SqlConnection(connectionString);
-        await using var command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@Id", user.Id);
-        command.Parameters.AddWithValue("@Username", user.Username);
-        command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-        command.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
-        await connection.OpenAsync();
-        await command.ExecuteNonQueryAsync();
-    }
-
-    private static User MapRow(SqlDataReader reader) => new()
+    private static User MapRow(IDataRecord r) => new()
     {
-        Id = reader.GetGuid(0),
-        Username = reader.GetString(1),
-        PasswordHash = reader.GetString(2),
-        CreatedAt = reader.GetDateTime(3)
+        Id = r.GetGuid(0),
+        Username = r.GetString(1),
+        PasswordHash = r.GetString(2),
+        CreatedAt = r.GetDateTime(3)
     };
 }

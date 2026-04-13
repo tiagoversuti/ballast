@@ -10,8 +10,9 @@ public static class InfrastructureServiceExtensions
         this IServiceCollection services,
         string connectionString)
     {
-        services.AddScoped<ITodoRepository>(_ => new TodoRepository(connectionString));
-        services.AddScoped<IUserRepository>(_ => new UserRepository(connectionString));
+        services.AddScoped<IDatabase>(db => new SqlDatabase(connectionString));
+        services.AddScoped<ITodoRepository>(r => new TodoRepository(r.GetRequiredService<IDatabase>()));
+        services.AddScoped<IUserRepository>(r => new UserRepository(r.GetRequiredService<IDatabase>()));
         return services;
     }
 }
