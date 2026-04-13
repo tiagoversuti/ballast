@@ -1,4 +1,4 @@
-# Ballast
+# Ballast Todo
 
 A full-stack Todo List application built with .NET 10 and React.
 
@@ -7,11 +7,11 @@ A full-stack Todo List application built with .NET 10 and React.
 ```
 ballast/
 ├── backend/Ballast/
-│   ├── Ballast.Api/           # ASP.NET Core Web API
-│   ├── Ballast.Application/   # Entities, interfaces, services, DTOs
+│   ├── Ballast.Api/            # ASP.NET Core Web API
+│   ├── Ballast.Application/    # Entities, interfaces, services, DTOs
 │   ├── Ballast.Infrastructure/ # Repositories, database access
-│   └── Ballast.Tests/         # xUnit unit tests
-└── frontend/                  # React + Vite + Tailwind CSS
+│   └── Ballast.Tests/          # xUnit unit tests
+└── frontend/                   # React + Vite + Tailwind CSS
 ```
 
 ---
@@ -83,7 +83,7 @@ cd backend/Ballast
 dotnet test
 ```
 
-All 43 tests are pure unit tests — no database required.
+All 43 tests are unit tests.
 
 ---
 
@@ -103,14 +103,6 @@ npm run dev
 ```
 
 Opens at `http://localhost:5173`. All `/api/*` requests are proxied to `https://localhost:7033`, so the backend must be running first.
-
-### Building for production
-
-```bash
-npm run build
-```
-
-Output is written to `frontend/dist/`.
 
 ---
 

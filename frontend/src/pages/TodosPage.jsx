@@ -68,7 +68,7 @@ export default function TodosPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="font-semibold text-gray-800">Ballast</span>
+          <span className="font-semibold text-gray-800">Ballast Todo</span>
           <button
             onClick={logout}
             className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
